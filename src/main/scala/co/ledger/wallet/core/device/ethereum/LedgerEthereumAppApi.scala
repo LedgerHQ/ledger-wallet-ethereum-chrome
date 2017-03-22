@@ -64,7 +64,7 @@ object LedgerEthereumAppApi {
       import scala.util.matching.Regex
       val pattern = "([0-9]+)\\.([0-9]+)\\.([0-9]+)".r
       val pattern(major, minor, patch) = version
-      (this.major << 16 + this.minor << 8 + this.patch) - (major.toInt << 16 + minor.toInt << 8 + patch.toInt)
+      ((this.major << 16) + (this.minor << 8) + this.patch) - ((major.toInt << 16) + (minor.toInt << 8) + patch.toInt)
     }
 
     def <(version: String) = compare(version) < 0
