@@ -47,11 +47,13 @@ class UsbDeviceFactory extends DeviceFactory {
     */
   override def isCompatible: Boolean = true
 
-  override def requestScan(): ScanRequest = new ScanRequestImpl
+  override def requestScan(): ScanRequest = new ScanRequestImpl(transport)
 
   override def connectivityType: ConnectivityType = ConnectivityTypes.Usb
 
   override def requestPermission(): Future[Unit] = Future.successful()
+
+  var transport: UsbHidExchangePerformer.Transport = UsbHidExchangePerformer.LedgerTransport()
 
   /** *
     * Check if service is enabled (may block the current thread)
@@ -67,7 +69,7 @@ class UsbDeviceFactory extends DeviceFactory {
     */
   override def hasPermissions: Boolean = true
 
-  private class ScanRequestImpl extends ScanRequest {
+  private class ScanRequestImpl(transport: UsbHidExchangePerformer.Transport) extends ScanRequest {
     val chrome = js.Dynamic.global.chrome
 
     override def onStart(): Unit = {
@@ -77,7 +79,7 @@ class UsbDeviceFactory extends DeviceFactory {
           val diffs = _previousResult.map(_.deviceId).diff(devices.map(_.deviceId)).concat(devices.map(_.deviceId).diff(_previousResult.map(_.deviceId)))
           for (id <- diffs) {
             if (!_previousResult.exists(_.deviceId == id)) {
-              val device = new UsbDeviceImpl(devices.find(_.deviceId == id).get)
+              val device = new UsbDeviceImpl(devices.find(_.deviceId == id).get, transport)
               _devices(id) = device
               notifyDeviceDiscovered(device)
             } else {

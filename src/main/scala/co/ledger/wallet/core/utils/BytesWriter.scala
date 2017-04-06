@@ -62,6 +62,16 @@ class BytesWriter(length: Int) {
     writeByte((int & 0xFF).toByte)
   }
 
+  def writeShort(short: Short): BytesWriter = {
+    writeByte((short >> 8 & 0xFF).toByte)
+    writeByte((short & 0xFF).toByte)
+  }
+
+  def writeShort(short: Int): BytesWriter = {
+    writeByte((short >> 8 & 0xFF).toByte)
+    writeByte((short & 0xFF).toByte)
+  }
+
   def writeInt(int: Long): BytesWriter = {
     writeByte((int >> 24 & 0xFF).toByte)
     writeByte((int >> 16 & 0xFF).toByte)
@@ -123,6 +133,8 @@ class BytesWriter(length: Int) {
     }
     this
   }
+
+  def size = _buffer.size()
 
   def toByteArray = _buffer.toByteArray
 

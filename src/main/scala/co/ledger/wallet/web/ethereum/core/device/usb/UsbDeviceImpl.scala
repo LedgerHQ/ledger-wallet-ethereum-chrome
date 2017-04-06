@@ -42,13 +42,13 @@ import scala.scalajs.js
   * SOFTWARE.
   *
   */
-class UsbDeviceImpl(deviceInfo: HidDeviceInfo) extends Device {
+class UsbDeviceImpl(deviceInfo: HidDeviceInfo, transport: UsbHidExchangePerformer.Transport) extends Device {
   private val chrome = js.Dynamic.global.chrome
   override def connect(): Future[Device] = {
     _connectionPromise.getOrElse({
       _connectionPromise = Option(Promise())
       chrome.hid.connect(deviceInfo.deviceId, {(connection: UsbDeviceImpl.Connection) =>
-        _exchanger = Some(new UsbHidExchangePerformer(connection, _debug, true))
+        _exchanger = Some(new UsbHidExchangePerformer(connection, _debug, transport))
         _connectionPromise.get.success(connection)
         _emitter.emit(Connect(this))
         chrome.hid.onDeviceRemoved.addListener(_callback)

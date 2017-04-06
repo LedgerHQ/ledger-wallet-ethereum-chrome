@@ -1,16 +1,16 @@
 package co.ledger.wallet.web.ethereum.core.device.usb
 
 import co.ledger.wallet.core.device.Device.CommunicationException
-import co.ledger.wallet.core.utils.HexUtils
+import co.ledger.wallet.core.utils.{BytesReader, HexUtils}
 import co.ledger.wallet.core.utils.logs.{Loggable, Logger}
-import co.ledger.wallet.web.ethereum.core.device.LedgerTransportHelper
+import co.ledger.wallet.web.ethereum.core.device.{FidoU2fTransportHelper, LedgerTransportHelper}
 import co.ledger.wallet.web.ethereum.core.device.usb.UsbDeviceImpl.UsbExchangePerformer
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Random, Success}
 
 /**
   *
@@ -44,25 +44,45 @@ import scala.util.{Failure, Success}
   */
 class UsbHidExchangePerformer(connection: UsbDeviceImpl.Connection,
                               var debug: Boolean,
-                              var useLedgerTransport: Boolean
+                              val transport: UsbHidExchangePerformer.Transport
                              ) extends UsbExchangePerformer with Loggable {
-
+  import UsbHidExchangePerformer._
   override implicit val LogTag: String = "APDU"
   val HidBufferSize = 64
   val LedgerDefaultChannel = 2
   val Sw1DataAvailable = 0x61
 
+
+  private var _initializeFuture: Option[Future[Unit]] = None
+  private val fidoHelper = new FidoU2fTransportHelper(HidBufferSize)
   private val chrome = js.Dynamic.global.chrome
 
   override def close(): Unit = {
     chrome.hid.disconnect(connection.connectionId)
   }
 
-  override def performExchange(cmd: Array[Byte]): Future[Array[Byte]] = {
+
+  override def performExchange(command: Array[Byte]): Future[Array[Byte]] =
+    init().flatMap(_ => performExchange(command, fidoHelper.MessageTag()))
+
+  private def transportName = transport match {
+    case LedgerTransport() => "LEDGER"
+    case FidoU2FTransport() => "FIDO"
+    case LegacyTransport() => "LEGACY"
+  }
+
+  def performExchange(cmd: Array[Byte], tag: fidoHelper.Tag): Future[Array[Byte]] = {
+    Logger.v(s"($transportName) => ${HexUtils.bytesToHex(cmd)}")("APDU")
     var command = cmd
-    if (useLedgerTransport) {
-      command = LedgerTransportHelper.wrapCommandAPDU(LedgerDefaultChannel, cmd, HidBufferSize)
+    transport match {
+      case LedgerTransport() =>
+        command = LedgerTransportHelper.wrapCommandAPDU(LedgerDefaultChannel, cmd, HidBufferSize)
+      case FidoU2FTransport() =>
+        command = fidoHelper.wrapCommandAPDU(tag, cmd)
+      case LegacyTransport() =>
+        // Ignore
     }
+    Logger.v(s"wrapped ${HexUtils.bytesToHex(command)}")
     def sendBlocks(offset: Int = 0): Future[Unit] = {
       val blockSize = if (command.length - offset > HidBufferSize) HidBufferSize else command.length - offset
       System.arraycopy(command, offset, _transferBuffer, 0, blockSize)
@@ -87,17 +107,54 @@ class UsbHidExchangePerformer(connection: UsbDeviceImpl.Connection,
         }
       }
     }
+    def receiveFidoU2fBlock(buffer: ArrayBuffer[Byte]): Future[Array[Byte]] = {
+      receive().flatMap {(response) =>
+        buffer ++= response
+        val responseData = fidoHelper.unwrapResponseAPDU(tag, buffer.toArray)
+        if (responseData == null) {
+          receiveFidoU2fBlock(buffer)
+        } else {
+          Logger.v(s"unwrapping ${HexUtils.bytesToHex(buffer.toArray)}")
+          Future.successful(responseData)
+        }
+      }
+    }
     def receiveBlocks(buffer: ArrayBuffer[Byte] = ArrayBuffer.empty[Byte]): Future[Array[Byte]] = {
-      if (useLedgerTransport)
-        receiveLedgerBlock(buffer)
-      else
-        receiveLegacyBlock(buffer)
+      transport match {
+        case LedgerTransport() =>
+          receiveLedgerBlock(buffer)
+        case FidoU2FTransport() =>
+          receiveFidoU2fBlock(buffer)
+        case LegacyTransport() =>
+          receiveLegacyBlock(buffer)
+      }
     }
     sendBlocks().flatMap((_) => receiveBlocks()) andThen {
       case Success(result) =>
-
+        Logger.v(s"($transportName) <= ${HexUtils.bytesToHex(result)}")("APDU")
       case Failure(ex) =>
         ex.printStackTrace()
+    }
+  }
+
+  private def init(): Future[Unit] = {
+    _initializeFuture.getOrElse {
+      _initializeFuture = Some(transport match {
+        case FidoU2FTransport() =>
+          val nonce = Array.fill[Byte](8)((Random.nextInt(256) - 128).toByte)
+          performExchange(nonce, fidoHelper.InitTag()) map {(answer) =>
+            val reader = new BytesReader(answer)
+            if (!(reader.readNextBytes(8) sameElements nonce)) {
+              throw new Exception("Invalid channel initialization")
+            } else {
+              fidoHelper.channel = reader.readNextInt()
+            }
+            ()
+          }
+        case other =>
+          Future.successful[Unit]()
+      })
+      _initializeFuture.get
     }
   }
 
@@ -126,4 +183,13 @@ class UsbHidExchangePerformer(connection: UsbDeviceImpl.Connection,
   }
 
   private val _transferBuffer = new Array[Byte](HidBufferSize)
+}
+
+object UsbHidExchangePerformer {
+
+  sealed trait Transport
+  case class LegacyTransport() extends Transport
+  case class LedgerTransport() extends Transport
+  case class FidoU2FTransport() extends Transport
+
 }

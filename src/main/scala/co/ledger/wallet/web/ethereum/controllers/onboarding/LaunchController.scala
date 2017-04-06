@@ -7,6 +7,7 @@ import co.ledger.wallet.core.device.DeviceFactory.{DeviceDiscovered, DeviceLost,
 import co.ledger.wallet.core.device.ethereum.LedgerApi
 import co.ledger.wallet.core.device.{Device, DeviceFactory}
 import co.ledger.wallet.core.utils.DerivationPath
+import co.ledger.wallet.web.ethereum.core.device.usb.UsbHidExchangePerformer
 import co.ledger.wallet.web.ethereum.core.utils.{ChromeGlobalPreferences, ChromePreferences, JQueryHelper, OsHelper}
 import co.ledger.wallet.web.ethereum.services.{DeviceService, WindowService}
 import org.scalajs.jquery.jQuery
@@ -101,6 +102,7 @@ class LaunchController(override val windowService: WindowService,
     }
   }
 
+  deviceService.usbDeviceFactory.transport = UsbHidExchangePerformer.FidoU2FTransport()
   private def startDeviceDiscovery(): Unit = {
     _scanRequest = deviceService.requestScan()
     _scanRequest.onScanUpdate {
@@ -134,6 +136,12 @@ class LaunchController(override val windowService: WindowService,
             $route.reload()
           }
         case Failure(ex) =>
+          deviceService.usbDeviceFactory.transport match {
+            case UsbHidExchangePerformer.LedgerTransport() =>
+              deviceService.usbDeviceFactory.transport = UsbHidExchangePerformer.FidoU2FTransport()
+            case others =>
+              deviceService.usbDeviceFactory.transport = UsbHidExchangePerformer.LedgerTransport()
+          }
           ex.printStackTrace()
           startDeviceDiscovery()
       }

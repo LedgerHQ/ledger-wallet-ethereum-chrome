@@ -76,6 +76,8 @@ class DeviceService($location: Location,  $route: js.Dynamic, sessionService: Se
     Usb -> new UsbDeviceFactory
   )
 
+  def usbDeviceFactory = _deviceManager(Usb).asInstanceOf[UsbDeviceFactory]
+
   private val _preferences = new ChromeGlobalPreferences("DeviceService")
 
   private val _eventReceiver = new EventReceiver {

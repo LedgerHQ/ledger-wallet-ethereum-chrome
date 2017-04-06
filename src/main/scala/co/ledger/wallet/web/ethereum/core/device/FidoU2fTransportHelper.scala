@@ -1,6 +1,7 @@
 package co.ledger.wallet.web.ethereum.core.device
 
-import co.ledger.wallet.core.utils.BytesWriter
+import co.ledger.wallet.core.utils.logs.Logger
+import co.ledger.wallet.core.utils.{BytesReader, BytesWriter}
 
 /**
   *
@@ -32,7 +33,7 @@ import co.ledger.wallet.core.utils.BytesWriter
   * SOFTWARE.
   *
   */
-object FidoU2fTransportHelper {
+class FidoU2fTransportHelper(val packetSize: Int) {
 
   /*
 
@@ -59,12 +60,82 @@ object FidoU2fTransportHelper {
 
    */
 
-  def wrapCommandAPDU(tag: Byte, command: Array[Byte], packetSize: Int): Array[Byte] = {
+  val BroadcastChannel = 0xffffffff
+
+  sealed class Tag(val value: Byte)
+  case class InitTag() extends Tag(0x86.toByte)
+  case class MessageTag() extends Tag(0x83.toByte)
+
+  private var _channel = BroadcastChannel
+  def channel_= (channel: Int): Unit = _channel = channel
+  def channel = _channel
+
+  def wrapCommandAPDU(tag: Tag, command: Array[Byte]): Array[Byte] = {
     val writer = new BytesWriter()
+    val apdu = new BytesReader(command)
 
+    // Writes the initialization packet
 
+    writer
+      .writeInt(_channel)
+      .writeByte(tag.value)
+      .writeShort(command.length)
+      .writeByteArray(apdu.safeReadNextBytes(packetSize - 7))
 
-    writer.toByteArray
+    var sequence = 0.toByte
+    while (apdu.available != 0) {
+      // Writes the continuation packet
+      val data = apdu.safeReadNextBytes(packetSize - 5)
+      writer
+        .writeInt(_channel)
+        .writeByte(sequence)
+        .writeByteArray(data)
+      sequence = (sequence + 1).toByte
+    }
+    Logger.d(s"Got ${packetSize} ${writer.size} ${writer.size % packetSize}")
+    writer
+      .writeByteArray(Array.fill[Byte](packetSize - (writer.size % packetSize))(0))
+      .toByteArray
+  }
+
+  def unwrapResponseAPDU(tag: Tag, data: Array[Byte]): Array[Byte] = {
+    val writer = new BytesWriter()
+    if (data == null || data.length < 7) {
+      null
+    } else {
+      val reader = new BytesReader(data)
+      var readChannel = reader.readNextInt()
+      if (readChannel != _channel) {
+        if (_channel == BroadcastChannel) {
+          _channel = readChannel
+        } else {
+          throw new Exception("Invalid channel")
+        }
+      }
+      if (reader.readNextByte() != tag.value)
+        throw new Exception("Invalid command")
+      val responseLength = reader.readNextShort()
+      if (reader.available < responseLength) {
+        null
+      } else {
+        var blockSize = if (responseLength < packetSize - 7) responseLength else (packetSize - 7)
+        writer.writeByteArray(reader.readNextBytes(blockSize))
+        var sequence = 0.toByte
+        while (writer.size < responseLength) {
+          readChannel = reader.readNextInt()
+          if (_channel != readChannel)
+            throw new Exception("Invalid channel")
+          if (reader.readNextByte() != sequence)
+            throw new Exception("Invalid sequence")
+          sequence = (sequence + 1).toByte
+          blockSize = Math.min(responseLength - writer.size, packetSize - 5)
+          if (reader.available < blockSize)
+            return null
+          writer.writeByteArray(reader.readNextBytes(blockSize))
+        }
+        writer.toByteArray
+      }
+    }
   }
 
 }

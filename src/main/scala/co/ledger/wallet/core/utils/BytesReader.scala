@@ -34,6 +34,8 @@ package co.ledger.wallet.core.utils
 import java.math.BigInteger
 import java.nio.charset.Charset
 
+import scala.collection.mutable.ArrayBuffer
+
 class BytesReader(val bytes: Array[Byte], private val startOffset: Int, val length: Int) {
 
   protected[this] var _offset = startOffset
@@ -79,6 +81,16 @@ class BytesReader(val bytes: Array[Byte], private val startOffset: Int, val leng
     for (i <- bytes.indices)
       bytes(i) = readNextByte()
     bytes
+  }
+
+  def safeReadNextBytes(length: Int): Array[Byte] = {
+    val bytes = ArrayBuffer[Byte]()
+    var i = 0
+    while (i < length && available > 0) {
+      bytes += readNextByte()
+      i += 1
+    }
+    bytes.toArray
   }
 
   def readNextBytesUntilEnd(): Array[Byte] = readNextBytes(length - _offset)
