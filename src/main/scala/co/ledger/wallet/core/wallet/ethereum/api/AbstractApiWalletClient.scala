@@ -92,14 +92,16 @@ abstract class AbstractApiWalletClient(override val name: String,
         val accounts = _accounts.slice(from, _accounts.length)
         Future.sequence(accounts.map(_.synchronize(syncToken)).toSeq)
       } flatMap { (_) =>
-        if (_accounts.last.keyChain.issuedKeys != 0) {
-          // Create an new account
-          val newAccountIndex = _accounts.length
-          createAccount(newAccountIndex) flatMap { (_) =>
-            synchronizeUntilEmptyAccount(syncToken, newAccountIndex)
+        _accounts.last.countOperations().flatMap {(count) =>
+          println(s"Account (${_accounts.length - 1}) has $count operations")
+          if (count != 0) {
+            val newAccountIndex = _accounts.length
+            createAccount(newAccountIndex) flatMap { (_) =>
+              synchronizeUntilEmptyAccount(syncToken, 0)
+            }
+          } else {
+            Future.successful()
           }
-        } else {
-          Future.successful()
         }
       } recoverWith {
         case HttpException(_, response, _) =>
@@ -201,10 +203,10 @@ abstract class AbstractApiWalletClient(override val name: String,
   }
 
   private def createAccount(index: Int): Future[Account] = {
-    ethereumAccountProvider.getEthereumAccount(DerivationPath(s"44'/$bip44CoinType'${coinPathPrefix}/$index'/0")).map { (ethereumAccount) =>
+    ethereumAccountProvider.getEthereumAccount(DerivationPath(s"44'/$bip44CoinType'${coinPathPrefix}/0'/$index")).map { (ethereumAccount) =>
       val account = new AccountRow(index, ethereumAccount.toString)
       putAccount(account)
-      _accounts = Array(newAccountClient(account))
+      _accounts = _accounts :+ newAccountClient(account)
       _accounts.last
     }
   }

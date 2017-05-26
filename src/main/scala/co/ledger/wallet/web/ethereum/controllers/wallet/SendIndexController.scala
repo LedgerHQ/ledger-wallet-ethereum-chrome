@@ -1,7 +1,7 @@
 package co.ledger.wallet.web.ethereum.controllers.wallet
 
 import biz.enef.angulate.Module.RichModule
-import biz.enef.angulate.core.JQLite
+import biz.enef.angulate.core.{JQLite, Location}
 import biz.enef.angulate.{Controller, Scope}
 import co.ledger.wallet.core.device.ethereum.LedgerApi
 import co.ledger.wallet.core.wallet.ethereum.{Ether, EthereumAccount}
@@ -46,8 +46,9 @@ import scala.util.{Failure, Success, Try}
   *
   */
 class SendIndexController(override val windowService: WindowService,
-                          $location: js.Dynamic,
+                          $location: Location,
                           $route: js.Dynamic,
+                          $routeParams: js.Dictionary[String],
                           override val sessionService: SessionService,
                           val deviceService: DeviceService,
                           $element: JQLite,
@@ -59,6 +60,23 @@ class SendIndexController(override val windowService: WindowService,
   var amount = ""
   var customGasLimit = ""
   var data = ""
+
+  val accountId = {
+    if ($routeParams.contains("id"))
+      $routeParams("id").toInt
+    else
+      0
+  }
+
+  def nextAccount(): Unit = {
+    $location.url(s"/send/${accountId + 1}")
+    $route.reload()
+  }
+
+  def previousAccount(): Unit = {
+    $location.url(s"/send/${accountId - 1}")
+    $route.reload()
+  }
 
   def gasLimit = if (!isInAdvancedMode) BigInt(21000) else Try(BigInt(customGasLimit)).getOrElse(BigInt(21000))
   private var _gasPrice = BigInt("21000000000")
@@ -165,7 +183,7 @@ class SendIndexController(override val windowService: WindowService,
                 SnackBar.error("send.enable_data_title", "send.enable_data_message").show()
               } else {
                 println(s"/send/${value.get.toString()}/to/$address/from/0/with/$fees/price/$gasPrice/data/$data")
-                $location.path(s"/send/${value.get.toString()}/to/$address/from/0/with/$fees/price/$gasPrice/data/$data")
+                $location.path(s"/send/${value.get.toString()}/to/$address/from/$accountId/with/$fees/price/$gasPrice/data/$data")
                 $scope.$apply()
               }
             }

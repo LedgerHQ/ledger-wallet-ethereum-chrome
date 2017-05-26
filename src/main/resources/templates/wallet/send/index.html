@@ -1,4 +1,7 @@
 <div class="fullsize-flex" ng-controller="SendIndexController as ctrl">
+    <p>Current account: {{ctrl.accountId}}</p>
+    <button  ng-click="ctrl.previousAccount()">previous</button>
+    <button  ng-click="ctrl.nextAccount()">next</button>
     <div class="wallet-view" ng-hide="ctrl.isScanning">
         <section>
             <header>

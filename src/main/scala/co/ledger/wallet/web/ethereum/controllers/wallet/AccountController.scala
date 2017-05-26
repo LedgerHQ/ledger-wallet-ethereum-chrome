@@ -1,7 +1,7 @@
 package co.ledger.wallet.web.ethereum.controllers.wallet
 
 import biz.enef.angulate.Module.RichModule
-import biz.enef.angulate.core.JQLite
+import biz.enef.angulate.core.{JQLite, Location}
 import biz.enef.angulate.{Controller, Scope}
 import co.ledger.wallet.core.device.utils.EventReceiver
 import co.ledger.wallet.core.wallet.ethereum.Operation
@@ -48,6 +48,8 @@ class AccountController(override val windowService: WindowService,
                         override val sessionService: SessionService,
                         override val $scope: Scope,
                         $element: JQLite,
+                        $location: Location,
+                        $route: js.Dynamic,
                         $routeParams: js.Dictionary[String])
   extends Controller with WalletController with EventReceiver {
 
@@ -61,6 +63,16 @@ class AccountController(override val windowService: WindowService,
   var hideLoader = true
 
   var operations = js.Array[js.Dictionary[js.Any]]()
+
+  def nextAccount(): Unit = {
+    $location.url(s"/account/${accountId + 1}")
+    $route.reload()
+  }
+
+  def previousAccount(): Unit = {
+    $location.url(s"/account/${accountId - 1}")
+    $route.reload()
+  }
 
   private var reloadOperationNonce = 0
   def reloadOperations(): Unit = {

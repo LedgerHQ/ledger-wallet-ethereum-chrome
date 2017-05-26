@@ -102,7 +102,7 @@ class LaunchController(override val windowService: WindowService,
     }
   }
 
-  deviceService.usbDeviceFactory.transport = UsbHidExchangePerformer.FidoU2FTransport()
+  deviceService.usbDeviceFactory.transport = UsbHidExchangePerformer.LedgerTransport()
   private def startDeviceDiscovery(): Unit = {
     _scanRequest = deviceService.requestScan()
     _scanRequest.onScanUpdate {
@@ -138,7 +138,7 @@ class LaunchController(override val windowService: WindowService,
         case Failure(ex) =>
           deviceService.usbDeviceFactory.transport match {
             case UsbHidExchangePerformer.LedgerTransport() =>
-              deviceService.usbDeviceFactory.transport = UsbHidExchangePerformer.FidoU2FTransport()
+              deviceService.usbDeviceFactory.transport = UsbHidExchangePerformer.LedgerTransport()
             case others =>
               deviceService.usbDeviceFactory.transport = UsbHidExchangePerformer.LedgerTransport()
           }

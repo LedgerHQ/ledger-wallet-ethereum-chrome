@@ -2,6 +2,7 @@ package co.ledger.wallet.web.ethereum.controllers.wallet
 
 import biz.enef.angulate.{Controller, Scope}
 import biz.enef.angulate.Module.RichModule
+import biz.enef.angulate.core.Location
 import co.ledger.wallet.web.ethereum.services.{SessionService, WindowService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -39,8 +40,18 @@ import scala.scalajs.js
   */
 class ReceiveController(override val windowService: WindowService,
                         override val $scope: Scope,
+                        $location: Location,
+                        $route: js.Dynamic,
+                        $routeParams: js.Dictionary[String],
                         override val sessionService: SessionService) extends Controller with WalletController {
 
+
+  val accountId = {
+    if ($routeParams.contains("id"))
+      $routeParams("id").toInt
+    else
+      0
+  }
   var address = ""
   var iban = ""
   def uri = {
@@ -50,13 +61,24 @@ class ReceiveController(override val windowService: WindowService,
       address
   }
 
+
+  def nextAccount(): Unit = {
+    $location.url(s"/receive/${accountId + 1}")
+    $route.reload()
+  }
+
+  def previousAccount(): Unit = {
+    $location.url(s"/receive/${accountId - 1}")
+    $route.reload()
+  }
+
   def showIban = currentFormat == "IBAN"
   def showHex = currentFormat == "HEX"
 
   var formats = js.Dictionary("HEX" -> "HEX", "IBAN" -> "IBAN")
   var currentFormat = sessionService.currentSession.get.sessionPreferences.lift("address_format").getOrElse("HEX")
 
-  sessionService.currentSession.get.wallet.account(0) foreach {(account) =>
+  sessionService.currentSession.get.wallet.account(accountId) foreach {(account) =>
     account.ethereumAccount() foreach { (a) =>
       address = a.toChecksumString
       iban = a.toIban

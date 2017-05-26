@@ -99,7 +99,7 @@ object SessionService {
   case class EthereumClassicChain() extends EthereumChainIdentifier(
     "ethc",
     "60",
-    "/160720'",
+    "",
     "https://gastracker.io/",
     "ETC"
   )
