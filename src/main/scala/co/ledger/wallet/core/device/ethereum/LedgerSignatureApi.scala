@@ -38,7 +38,7 @@ import scala.concurrent.Future
   * SOFTWARE.
   *
   */
-trait LedgerSignatureApi extends LedgerCommonApiInterface {
+trait LedgerSignatureApi extends LedgerCommonApiInterface with LedgerEthereumAppApi {
 
   def signTransaction(nonce: BigInt,
                       gasPrice: BigInt,
@@ -46,27 +46,39 @@ trait LedgerSignatureApi extends LedgerCommonApiInterface {
                       from: DerivationPath,
                       to: EthereumAccount,
                       value: BigInt,
-                      data: Array[Byte]): Future[SignatureResult] = {
-    val unsignedSerialization = List(nonce, gasPrice, startGas, to.toByteArray, value, data)
-    val serializedTx = RLP.encode(unsignedSerialization)
-    val rawDerivationPath = new BytesWriter().writeDerivationPath(from).toByteArray
-    def sendChunks(i: Int): Future[CommandResult] = {
-      val offset = Math.max(i * 255 - rawDerivationPath.length, 0)
-      val length = 255 - (if (i == 0) rawDerivationPath.length else 0)
-      val chunk = (if (i == 0) rawDerivationPath else Array.empty[Byte]) ++ serializedTx.slice(offset, offset + length)
-      sendApdu(0xE0, 0x04, if (i == 0) 0x00 else 0x80, 0x00, chunk, 0x00) flatMap {(result) =>
-        matchErrorsAndThrow(result)
-        if ((i + 1) * 255 - rawDerivationPath.length < serializedTx.length)
-          sendChunks(i + 1)
-        else
-          Future.successful(result)
+                      data: Array[Byte],
+                      chain: Boolean
+                      ): Future[SignatureResult] = {
+    getAppConfiguration() flatMap { (e) =>
+      val eip155 = e > "1.0.4"
+      var unsignedSerialization = {
+        if (eip155 && chain) {
+          List(nonce, gasPrice, startGas, to.toByteArray, value, data, 0x01, 0x00, 0x00)
+        } else {
+          List(nonce, gasPrice, startGas, to.toByteArray, value, data)
+        }
+      }
+      val serializedTx = RLP.encode(unsignedSerialization)
+      val rawDerivationPath = new BytesWriter().writeDerivationPath(from).toByteArray
+
+      def sendChunks(i: Int): Future[CommandResult] = {
+        val offset = Math.max(i * 255 - rawDerivationPath.length, 0)
+        val length = 255 - (if (i == 0) rawDerivationPath.length else 0)
+        val chunk = (if (i == 0) rawDerivationPath else Array.empty[Byte]) ++ serializedTx.slice(offset, offset + length)
+        sendApdu(0xE0, 0x04, if (i == 0) 0x00 else 0x80, 0x00, chunk, 0x00) flatMap { (result) =>
+          matchErrorsAndThrow(result)
+          if ((i + 1) * 255 - rawDerivationPath.length < serializedTx.length)
+            sendChunks(i + 1)
+          else
+            Future.successful(result)
+        }
+      }
+
+      sendChunks(0) map {(result) =>
+        SignatureResult(unsignedSerialization, result.data.readNextByte(), result.data.readNextBytes(32), result.data.readNextBytes(32))
       }
     }
-    sendChunks(0) map {(result) =>
-      SignatureResult(unsignedSerialization, result.data.readNextByte(), result.data.readNextBytes(32), result.data.readNextBytes(32))
-    }
   }
-
   /*
   ('nonce', big_endian_int),
   ('gasprice', big_endian_int),
