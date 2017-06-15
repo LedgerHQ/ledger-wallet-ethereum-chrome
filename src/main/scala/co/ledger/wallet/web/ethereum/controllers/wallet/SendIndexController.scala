@@ -68,8 +68,6 @@ class SendIndexController(override val windowService: WindowService,
 
   var isInAdvancedMode = false
   val supportAdvancedMode = sessionService.currentSession.get.dongleAppVersion > "1.0.0"
-  println("version")
-  println(sessionService.currentSession.get.dongleAppVersion.version)
 
 
   sessionService.currentSession.get.sessionPreferences.lift(SendIndexController.RestoreKey) foreach {(state) =>

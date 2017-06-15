@@ -50,7 +50,7 @@ trait LedgerSignatureApi extends LedgerCommonApiInterface with LedgerEthereumApp
                       chain: Boolean
                       ): Future[SignatureResult] = {
     getAppConfiguration() flatMap { (e) =>
-      val eip155 = e > "1.0.4"
+      val eip155 = e >= "1.0.4"
       var unsignedSerialization = {
         if (eip155 && chain) {
           println("used eip155")
@@ -96,6 +96,6 @@ trait LedgerSignatureApi extends LedgerCommonApiInterface with LedgerEthereumApp
 
 object LedgerSignatureApi {
   case class SignatureResult(unsignedTx: List[Any], v: Byte, r: Array[Byte], s: Array[Byte]) {
-    val signedTx = RLP.encode(unsignedTx :+ v :+ r :+ s)
+    val signedTx = RLP.encode(unsignedTx.slice(0,6) :+ v :+ r :+ s)
   }
 }
