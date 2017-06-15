@@ -53,6 +53,7 @@ trait LedgerSignatureApi extends LedgerCommonApiInterface with LedgerEthereumApp
       val eip155 = e > "1.0.4"
       var unsignedSerialization = {
         if (eip155 && chain) {
+          println("used eip155")
           List(nonce, gasPrice, startGas, to.toByteArray, value, data, 0x01, 0x00, 0x00)
         } else {
           List(nonce, gasPrice, startGas, to.toByteArray, value, data)
