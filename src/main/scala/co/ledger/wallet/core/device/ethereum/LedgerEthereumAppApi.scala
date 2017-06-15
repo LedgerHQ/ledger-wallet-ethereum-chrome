@@ -1,7 +1,7 @@
 package co.ledger.wallet.core.device.ethereum
 
 import co.ledger.wallet.core.device.ethereum.LedgerEthereumAppApi.AppConfiguration
-import co.ledger.wallet.core.utils.BytesReader
+import co.ledger.wallet.core.utils.{BytesReader, HexUtils}
 
 import scala.concurrent.Future
 
@@ -52,9 +52,9 @@ object LedgerEthereumAppApi {
 
   class AppConfiguration(reader: BytesReader) {
     val flags = reader.readNextByte()
-    val major = reader.readNextByte()
-    val minor = reader.readNextByte()
-    val patch = reader.readNextByte()
+    val major = reader.readNextByte().toInt
+    val minor = reader.readNextByte().toInt
+    val patch = reader.readNextByte().toInt
 
     val version = s"$major.$minor.$patch"
 
@@ -63,8 +63,8 @@ object LedgerEthereumAppApi {
     def compare(version: String): Int = {
       import scala.util.matching.Regex
       val pattern = "([0-9]+)\\.([0-9]+)\\.([0-9]+)".r
-      val pattern(major, minor, patch) = version
-      (this.major << 16 + this.minor << 8 + this.patch) - (major.toInt << 16 + minor.toInt << 8 + patch.toInt)
+      val pattern(ma, mi, pa) = version
+      ((this.major << 16) + (this.minor << 8) + this.patch) - ((ma.toInt << 16) + (mi.toInt << 8) + pa.toInt)
     }
 
     def <(version: String) = compare(version) < 0

@@ -68,6 +68,9 @@ class SendIndexController(override val windowService: WindowService,
 
   var isInAdvancedMode = false
   val supportAdvancedMode = sessionService.currentSession.get.dongleAppVersion > "1.0.0"
+  println("version")
+  println(sessionService.currentSession.get.dongleAppVersion.version)
+
 
   sessionService.currentSession.get.sessionPreferences.lift(SendIndexController.RestoreKey) foreach {(state) =>
     val restore = state.asInstanceOf[SendIndexController.RestoreState]
@@ -106,6 +109,7 @@ class SendIndexController(override val windowService: WindowService,
   }
 
   def computeTotal(): Ether = {
+    _gasPrice = BigInt(gasPrice)
     val t = getAmountInput().map((amount) => amount + (_gasPrice * gasLimit)).map(new Ether(_)).getOrElse(Ether(0))
     total = t.toBigInt.toString()
     t
@@ -137,7 +141,6 @@ class SendIndexController(override val windowService: WindowService,
   }
 
   updateGasPrice()
-
   def send() = {
     try {
       val value = getAmountInput()
