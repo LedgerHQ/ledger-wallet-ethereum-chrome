@@ -1,4 +1,9 @@
 # Changelog
+1.2.0 (2016-06-20)
+==================
+- Custom gas price
+- Fixing firmware version being wrongly identified
+
 1.1.0 (2016-10-26)
 ==================
 

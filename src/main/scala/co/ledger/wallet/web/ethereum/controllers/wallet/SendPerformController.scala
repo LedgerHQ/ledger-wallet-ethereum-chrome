@@ -59,7 +59,7 @@ class SendPerformController(override val windowService: WindowService,
   private val data = $routeParams.lift("data").map(_.replace("0x", "")).map(HexUtils.decodeHex)
 
   windowService.disableUserInterface()
-
+  val chain = sessionService.currentSession.get.chain.id == "eth"
   sessionService.currentSession.get.wallet.account(accountId) flatMap {(account) =>
     account.ethereumAccountDerivationPath() flatMap {(from) =>
       account.transactionNonce() flatMap {(nonce) =>
@@ -72,7 +72,8 @@ class SendPerformController(override val windowService: WindowService,
             from,
             to,
             amount,
-            data.getOrElse(Array.emptyByteArray)
+            data.getOrElse(Array.emptyByteArray),
+            chain
           )
         }
       }

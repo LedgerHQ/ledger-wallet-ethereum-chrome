@@ -79,7 +79,8 @@ trait TransactionDebugInterface extends BaseDebugInterface {
                       value: String,
                       gasLimit: UndefOr[String],
                       gasPrice: UndefOr[String],
-                      data: UndefOr[String]) = {
+                      data: UndefOr[String],
+                      chain: Boolean) = {
     var device: LedgerApi = null
     var nonce: Long = 0L
     val limit = gasLimit.getOrElse("210000")
@@ -99,7 +100,8 @@ trait TransactionDebugInterface extends BaseDebugInterface {
             DerivationPath(path),
             EthereumAccount(to),
             (BigDecimal(value.replace(',', '.').replace(" ", "")) * BigDecimal(10).pow(18)).toBigInt(),
-            sentData
+            sentData,
+            chain
           )
         }
       }

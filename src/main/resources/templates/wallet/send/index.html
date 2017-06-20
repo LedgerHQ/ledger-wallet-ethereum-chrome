@@ -44,6 +44,19 @@
                     </div>
                 </div>
                 <div ng-show="ctrl.isInAdvancedMode" >
+                    <div translate>send.gas_price</div>
+                    <div>
+                        <input
+                                style="text-transform: capitalize"
+                                class="small-text-input"
+                                type="text"
+                                ng-pattern="/^[0-9]+$/"
+                                ng-change="ctrl.computeTotal()"
+                                ng-model="ctrl.gasPrice"/>
+                        <label class="small-text-input" translate>wei</label>
+                    </div>
+                </div>
+                <div ng-show="ctrl.isInAdvancedMode" >
                     <div translate>send.contract_data</div>
                     <div>
                         <input
@@ -58,7 +71,7 @@
                     <div class="optional" translate>send.gas_limit</div>
                     <div><div class="regular-grey-text-small">{{ctrl.gasLimit.toString()}} gas</div></div>
                 </div>
-                <div>
+                <div ng-show="!ctrl.isInAdvancedMode" >
                     <div class="optional" translate>send.gas_price</div>
                     <div><amount value="ctrl.gasPrice"></amount></div>
                 </div>
