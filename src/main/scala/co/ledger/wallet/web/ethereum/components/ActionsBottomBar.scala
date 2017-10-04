@@ -39,7 +39,7 @@ class ActionsBottomBar extends Directive {
 
   override type ScopeType = js.Dynamic
 
-  override def templateUrl: String = "/templates/components/actions-bottom-bar.html"
+  override def templateUrl: String = "templates/components/actions-bottom-bar.html"
 
   override def transclude: Boolean = true
 }

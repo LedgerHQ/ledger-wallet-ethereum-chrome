@@ -54,7 +54,7 @@ class NavigationBar(sessionService: SessionService,
     "eth" -> "launch.eth",
     "ethc" -> "launch.etc"
   )
-  override def templateUrl: String = "/templates/components/navigation-bar.html"
+  override def templateUrl: String = "templates/components/navigation-bar.html"
 
   override def controller(ctrl: ControllerType, scope: Dynamic, elem: JQLite, attrs: Attributes): Unit = {
     scope.items = items
