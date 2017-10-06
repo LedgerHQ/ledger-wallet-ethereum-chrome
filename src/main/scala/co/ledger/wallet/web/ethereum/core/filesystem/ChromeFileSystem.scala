@@ -54,17 +54,19 @@ class ChromeFileSystem {
   }
 
   class FileEntry(entry: js.Dynamic) {
-
     def write(blob: Blob): Future[Unit] = {
       val promise = Promise[Unit]()
       var truncated = false
       entry.createWriter({(writer: js.Dynamic) =>
         writer.onwriteend = {() =>
-          truncated = true
-          // You need to explicitly set the file size to truncate
-          // any content that might have been there before
-          writer.truncate(blob.size)
-          promise.success()
+          if (!truncated) {
+            truncated = true
+            // You need to explicitly set the file size to truncate
+            // any content that might have been there before
+            writer.truncate(blob.size)
+          } else {
+            promise.success()
+          }
         }
         writer.onerror = {(e: js.Dynamic) =>
           promise.failure(new Exception(e.toString()))
