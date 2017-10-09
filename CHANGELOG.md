@@ -1,5 +1,10 @@
 # Changelog
-1.2.0 (2016-06-20)
+1.2.1 (2017-10-09)
+==================
+- Changing support contact method
+- Adapting paths for usage with an electron wrapper
+
+1.2.0 (2017-06-20)
 ==================
 - Custom gas price
 - Fixing firmware version being wrongly identified
