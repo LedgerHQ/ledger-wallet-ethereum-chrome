@@ -50,7 +50,7 @@ class HelpController(override val windowService: WindowService,
 
 
   def browseKnowledgeBase(): Unit = {
-    js.Dynamic.global.open("http://support.ledgerwallet.com/help_center")
+    js.Dynamic.global.open("http://support.ledgerwallet.com/")
   }
 
   def contactSupport(): Unit = {
