@@ -130,7 +130,7 @@ class OpeningController(override val windowService: WindowService,
   }
 
   def openHelpCenter(): Unit = {
-    js.Dynamic.global.open("http://support.ledgerwallet.com/help_center")
+    js.Dynamic.global.open("http://support.ledgerwallet.com/")
   }
 
 }
