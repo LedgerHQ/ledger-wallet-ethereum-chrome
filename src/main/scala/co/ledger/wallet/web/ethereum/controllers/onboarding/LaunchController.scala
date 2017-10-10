@@ -144,7 +144,7 @@ class LaunchController(override val windowService: WindowService,
   }
 
   def openLinuxInstruction(): Unit = {
-    js.Dynamic.global.open("http://support.ledgerwallet.com/knowledge_base/topics/ledger-wallet-is-not-recognized-on-linux")
+    js.Dynamic.global.open("http://support.ledgerwallet.com/hc/articles/115005165269-What-if-Ledger-Wallet-is-not-recognized-on-Linux")
   }
 
   def numberOfConnection = new ChromeGlobalPreferences("launches").int("count").getOrElse(0)
