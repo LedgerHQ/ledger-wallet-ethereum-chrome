@@ -55,7 +55,7 @@ class SplitDisclaimerController(override val windowService: WindowService,
   }
 
   def openHelpCenter(): Unit = {
-    js.Dynamic.global.open("https://ledger.groovehq.com/knowledge_base/topics/ethereum-classic-etc-important-notice")
+    js.Dynamic.global.open("https://ledger.zendesk.com/hc/en-us/articles/115005200049-Ethereum-Classic-ETC-important-notice")
   }
 
 }
