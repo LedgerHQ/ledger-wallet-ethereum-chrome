@@ -75,30 +75,36 @@ class LaunchController(override val windowService: WindowService,
   }
 
   private def animate(discover: Boolean) = {
-    // Initialize default state
-    JQueryHelper.injectCustomEasings()
-    val header = jQuery($element.find("> header").asInstanceOf[JQLite](0))
-    header.height(98)
-    val section = jQuery($element.find("> section").asInstanceOf[JQLite](0))
-    val document = jQuery(".onboarding-container")
-    val plugFooter = jQuery($element.find("#plugFooter"))
-    plugFooter.fadeOut(0)
-    section.css("opacity", 0)
-    val offset = header.offset().asInstanceOf[js.Dictionary[Double]]
-    val translate = (document.outerHeight(true) / 2 - header.outerHeight(true) / 2) - document.css("padding-top").replace("px", "").toInt
-    header.css("top", translate + "px")
+    if (js.Dynamic.global.mew_alert != true) {
+      $location.url("/onboarding/alert/")
+      $route.reload()
+    } else {
+      // Initialize default state
+      JQueryHelper.injectCustomEasings()
+      val header = jQuery($element.find("> header").asInstanceOf[JQLite](0))
+      header.height(98)
+      val section = jQuery($element.find("> section").asInstanceOf[JQLite](0))
+      val document = jQuery(".onboarding-container")
+      val plugFooter = jQuery($element.find("#plugFooter"))
+      plugFooter.fadeOut(0)
+      section.css("opacity", 0)
+      val offset = header.offset().asInstanceOf[js.Dictionary[Double]]
+      val translate = (document.outerHeight(true) / 2 - header.outerHeight(true) / 2) - document.css("padding-top").replace("px", "").toInt
+      header.css("top", translate + "px")
 
-    val duration = 750
-    val easing = "default"
-    setTimeout(OpeningAnimationDelay) {
-      // Perform animation
-      header.animate(js.Dictionary("top" -> 0), duration, easing)
-      section.animate(js.Dictionary("opacity" -> 1), duration, easing)
+      val duration = 750
+      val easing = "default"
+      setTimeout(OpeningAnimationDelay) {
+        // Perform animation
+        header.animate(js.Dictionary("top" -> 0), duration, easing)
+        section.animate(js.Dictionary("opacity" -> 1), duration, easing)
 
-      plugFooter.fadeIn(duration * 0.60)
-      if (discover)
-        startDeviceDiscovery()
+        plugFooter.fadeIn(duration * 0.60)
+        if (discover)
+          startDeviceDiscovery()
+      }
     }
+
   }
 
   private def startDeviceDiscovery(): Unit = {
