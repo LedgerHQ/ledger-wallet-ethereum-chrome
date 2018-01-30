@@ -1,0 +1,62 @@
+@import (reference) "../../constants";
+
+.alert-view {
+
+  section {
+
+   .alert {
+     line-height: 20px;
+     text-align: center;
+   }
+
+   .big-buttons-area {
+     display: flex;
+
+     > div {
+       width: 150px;
+       height: 40px;
+       display: flex;
+       justify-content: center;
+       align-items: center;
+       flex-direction: column;
+       border-radius: 16px;
+       cursor: pointer;
+       margin-left: 10px;
+
+       &:first-of-type {
+         margin-left: 0;
+       }
+
+       > h1 {
+         color: @color-white;
+         font-size: @font-size-extra-extra-large;
+         font-weight: @font-weight-light;
+       }
+
+       > p {
+         color: @color-white;
+         margin-top: 3px;
+         font-size: @font-size-medium;
+         text-align: center;
+       }
+
+       &.green {
+         background-color: @color-action-green;
+
+         &:hover {
+           background-color: darken(@color-action-green, @color-default-darken-value);
+         }
+       }
+
+       &.grey {
+         background-color: @color-light-grey;
+
+         &:hover {
+           background-color: darken(@color-light-grey, @color-default-darken-value);
+         }
+       }
+
+     }
+   }
+  }
+}
