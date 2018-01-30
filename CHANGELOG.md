@@ -1,4 +1,7 @@
 # Changelog
+1.2.2 (2018-30-10)
+- Add notice screen
+
 1.2.1 (2017-10-09)
 ==================
 - Changing support contact method
