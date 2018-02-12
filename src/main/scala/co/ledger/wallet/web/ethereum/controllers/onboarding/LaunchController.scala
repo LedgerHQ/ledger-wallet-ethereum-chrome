@@ -75,10 +75,10 @@ class LaunchController(override val windowService: WindowService,
   }
 
   private def animate(discover: Boolean) = {
-    if (js.Dynamic.global.mew_alert != true) {
+    /*if (js.Dynamic.global.mew_alert != true) {
       $location.url("/onboarding/alert/")
       $route.reload()
-    } else {
+    } else {*/
       // Initialize default state
       JQueryHelper.injectCustomEasings()
       val header = jQuery($element.find("> header").asInstanceOf[JQLite](0))
@@ -102,7 +102,7 @@ class LaunchController(override val windowService: WindowService,
         plugFooter.fadeIn(duration * 0.60)
         if (discover)
           startDeviceDiscovery()
-      }
+      //}
     }
 
   }
