@@ -109,7 +109,7 @@ object EthereumAccount {
   }
 
   def fromHex(hex: String): EthereumAccount = {
-    if (hex.length != 40 && hex.length != 42)
+    if ((hex.length != 40 && !hex.startsWith("0x")) || (hex.length != 42 && hex.startsWith("0x")))
       throw new Exception(s"[$hex] is not a valid hex ethereum account address")
     if (hex.exists((c) => !c.isDigit && c.isUpper) &&
         hex.exists((c) => !c.isDigit && c.isLower && c != 'x') &&
