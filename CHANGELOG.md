@@ -1,5 +1,9 @@
 # Changelog
 
+1.2.4 (2018-03-8)
+==================
+- Fix address validity checking
+
 1.2.3 (2018-12-02)
 ==================
 - Removed notice screen
