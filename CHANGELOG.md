@@ -1,4 +1,9 @@
 # Changelog
+1.3.2 (2018-08-09)
+==================
+- Add migration screen
+- Add alert notice
+
 1.2.5 (2018-03-28)
 ==================
 - Reword help page

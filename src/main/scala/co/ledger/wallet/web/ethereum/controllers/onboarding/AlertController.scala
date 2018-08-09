@@ -48,6 +48,7 @@ class AlertController(override val windowService: WindowService,
                         $element: JQLite,
                         $routeParams: js.Dictionary[String])
   extends Controller with OnBoardingController {
+  private val _chain = $routeParams.get("chain")
 
   private def animate() = {
     // Initialize default state
@@ -77,7 +78,7 @@ class AlertController(override val windowService: WindowService,
 
 
   def openHelpCenter(): Unit = {
-    js.Dynamic.global.open("https://support.ledgerwallet.com/hc/en-us/articles/115005200009")
+    js.Dynamic.global.open("https://www.ledger.fr/2018/08/03/important-message-concerning-the-ledger-wallet-ethereum-chrome-app/")
   }
 
   def openMew(): Unit = {
@@ -85,12 +86,17 @@ class AlertController(override val windowService: WindowService,
   }
 
   def accept(): Unit = {
-    js.Dynamic.global.mew_alert = true
-    $location.url(s"/onboarding/launch/")
-    $route.reload()
+    _chain match {
+      case Some(chain) =>
+        $location.url(s"/onboarding/opening/$chain/")
+        $route.reload()
+      case others =>
+        $location.url("/onboarding/chain/select")
+        $route.reload()
+    }
   }
 
-  animate()
+  //animate()
 }
 
 object AlertController {
