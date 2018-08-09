@@ -7,7 +7,7 @@ import biz.enef.angulate.ext.RouteProvider
 import co.ledger.wallet.core.utils.logs._
 import co.ledger.wallet.web.ethereum.components._
 import co.ledger.wallet.web.ethereum.controllers.WindowController
-import co.ledger.wallet.web.ethereum.controllers.onboarding.{LaunchController, OpeningController, SelectChainController, SplitDisclaimerController, AlertController}
+import co.ledger.wallet.web.ethereum.controllers.onboarding._
 import co.ledger.wallet.web.ethereum.controllers.wallet._
 import co.ledger.wallet.web.ethereum.core.utils.ChromePreferences
 import co.ledger.wallet.web.ethereum.filters.DateFormatFilter
@@ -47,6 +47,7 @@ object Application extends JSApp{
 
     // Controllers
     LaunchController.init(module)
+    LedgerLiveController.init(module)
     SelectChainController.init(module)
     OpeningController.init(module)
     WindowController.init(module)

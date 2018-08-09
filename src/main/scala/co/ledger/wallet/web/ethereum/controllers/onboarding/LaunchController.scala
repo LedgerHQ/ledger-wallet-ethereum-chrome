@@ -133,10 +133,10 @@ class LaunchController(override val windowService: WindowService,
         case Success(chain) =>
           incrementNumberOfConnection()
           if (chain.isDefined) {
-            $location.url(s"/onboarding/opening/${chain.get}/")
+            $location.url(s"/onboarding/live/${chain.get}/")
             $route.reload()
           } else {
-            $location.url("/onboarding/chain/select")
+            $location.url("/onboarding/live")
             $route.reload()
           }
         case Failure(ex) =>
