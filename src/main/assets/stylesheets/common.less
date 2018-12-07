@@ -25,3 +25,164 @@
 @import "controllers/wallet/send/perform";
 @import "controllers/wallet/help";
 @import "controllers/wallet/operations";
+@import "controllers/go_live";
+
+
+@font-face {
+  font-family: 'MuseoSans';
+  src: local('MuseoSans'), local('MuseoSans-Regular'), url('./fonts/MuseoSans500.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'MuseoSans';
+  src: local('MuseoSans'), local('MuseoSans-Light'), url('./fonts/MuseoSans300.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@live-color-white: #FFFFFF;
+@live-color-black: #000000;
+@live-color-blue: #6490f1;
+@live-color-grey: #999999;
+@live-color-dark-grey: #666666;
+@live-color-soft-grey: #d8d8d8;
+@live-screenshot-hack-top: -127px;
+@live-screenshot-hack-left: 180px;
+
+.go-live-screen {
+    background-color: @live-color-white;
+    display: flex;
+
+    height: 100%;
+    flex-grow: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    > p {
+        height: 0px;
+        overflow: visible;
+        position: relative;
+        top: @live-screenshot-hack-top;
+        left: @live-screenshot-hack-left;
+
+        > img {
+
+        }
+    }
+
+    > .content-frame {
+        background-color: @live-color-white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        width: 1028px;
+        flex-direction: column;
+        position: relative;
+
+        > div {
+            display: flex;
+            width: 343px;
+            max-width: 343px;
+            flex-direction: column;
+            .live-text-museo {
+                font-family: MuseoSans;
+                font-size: 14px;
+                font-weight: 500;
+                font-style: normal;
+                font-stretch: normal;
+                line-height: normal;
+                letter-spacing: normal;
+            }
+
+            .live-text-opensans {
+                font-family: 'Open Sans';
+                font-size: 14px;
+                font-weight: 500;
+                font-style: normal;
+                font-stretch: normal;
+                line-height: normal;
+                letter-spacing: normal;
+            }
+
+            h1 {
+                .live-text-museo();
+                font-size: 40px;
+                font-weight: 300;
+                margin-top: 0px;
+
+                letter-spacing: -1.5px;
+                color: @live-color-black;
+                b {
+                    font-weight: 500;
+                }
+             }
+
+            h2 {
+                .live-text-museo();
+                font-size: 20px;
+                font-weight: 300;
+                line-height: 1.5;
+                margin-top: 15px;
+                color: @live-color-grey;
+            }
+
+            h3 {
+                .live-text-museo();
+                color: @live-color-blue;
+                margin-top: 16px;
+            }
+
+            p {
+                max-width: 463px;
+                .live-text-opensans();
+                font-size: 14px;
+                line-height: 2.14;
+                margin-top: 20px;
+                color: @live-color-dark-grey;
+            }
+
+            a {
+                text-decoration: none;
+                &:hover {
+                    cursor: pointer;
+                }
+            }
+
+            #go {
+                width: 184px;
+                .live-text-museo();
+                color: @live-color-white;
+                background-color: @live-color-blue;
+                border-radius: 4px;
+                padding-left: 23px;
+                padding-right: 23px;
+                padding-top: 12px;
+                padding-bottom: 12px;
+                margin-top: 38px;
+                text-decoration: none;
+
+                &.larger {
+                    width: 210px;
+                }
+            }
+
+            #skip {
+                .live-text-museo();
+                font-size: 13px;
+                color: @live-color-blue;
+                margin-top: 21px;
+            }
+
+            #support {
+                .live-text-museo();
+                font-size: 13px;
+                color: @live-color-grey;
+                margin-top: 17px;
+            }
+        }
+    }
+}

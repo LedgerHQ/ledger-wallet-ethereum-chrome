@@ -6,7 +6,6 @@ import biz.enef.angulate.Module.RichModule
 import biz.enef.angulate.Service
 import co.ledger.wallet.web.ethereum.components.SnackBar.SnackBarInstance
 import co.ledger.wallet.web.ethereum.controllers.WindowController
-import co.ledger.wallet.web.ethereum.core.event.JsEventEmitter
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -79,14 +78,12 @@ class WindowService extends Service {
     if (_refreshHandler.isDefined && !isRefreshing) {
       val start = new Date().getTime
       _refreshing = true
-      eventEmitter.emit(StartRefresh())
       _refreshHandler.get() onComplete {
         case all =>
           import timers._
           val now = new Date().getTime
           setTimeout((now - start) % 1000L + 1000L) {
             _refreshing = false
-            eventEmitter.emit(StopRefresh())
           }
       }
     }
@@ -112,8 +109,6 @@ class WindowService extends Service {
 
   // SnackBar features
   var configureSnackBar: (Int, String, String) => SnackBarInstance = (_, _, _) => null
-
-  val eventEmitter = new JsEventEmitter
 
   case class StartRefresh()
   case class StopRefresh()

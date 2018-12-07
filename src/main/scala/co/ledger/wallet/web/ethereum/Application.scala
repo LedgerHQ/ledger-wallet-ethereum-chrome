@@ -4,15 +4,12 @@ import biz.enef.angulate.Module.RichModule
 import biz.enef.angulate._
 import biz.enef.angulate.core.HttpService
 import biz.enef.angulate.ext.RouteProvider
-import co.ledger.wallet.core.utils.logs._
 import co.ledger.wallet.web.ethereum.components._
 import co.ledger.wallet.web.ethereum.controllers.WindowController
-import co.ledger.wallet.web.ethereum.controllers.onboarding.{LaunchController, OpeningController, SelectChainController, SplitDisclaimerController, AlertController}
-import co.ledger.wallet.web.ethereum.controllers.wallet._
-import co.ledger.wallet.web.ethereum.core.utils.ChromePreferences
+import co.ledger.wallet.web.ethereum.controllers.onboarding._
 import co.ledger.wallet.web.ethereum.filters.DateFormatFilter
 import co.ledger.wallet.web.ethereum.i18n.{I18n, TranslateProvider}
-import co.ledger.wallet.web.ethereum.services.{DeviceService, SessionService, WindowService}
+import co.ledger.wallet.web.ethereum.services.WindowService
 
 import scala.scalajs.js
 import scala.scalajs.js.JSApp
@@ -42,32 +39,19 @@ object Application extends JSApp{
     ProgressBar.init(module)
     Spinner.init(module)
     SnackBar.init(module)
-    AmountLabel.init(module)
     Selector.init(module)
 
     // Controllers
-    LaunchController.init(module)
-    SelectChainController.init(module)
-    OpeningController.init(module)
+    LedgerLiveController.init(module)
     WindowController.init(module)
-    AccountController.init(module)
-    SendIndexController.init(module)
-    SendPerformController.init(module)
-    ReceiveController.init(module)
-    HelpController.init(module)
-    SplitDisclaimerController.init(module)
-    AlertController.init(module)
 
     // Services
     WindowService.init(module)
-    DeviceService.init(module)
-    SessionService.init(module)
 
     // Filters
     DateFormatFilter.init(module)
 
 
-    ChromePreferences.init()
     module.config(initRoutes _)
     module.config(($compileProvider: js.Dynamic) => {
       $compileProvider.aHrefSanitizationWhitelist(js.RegExp("^\\s*(https?|ftp|mailto|file|chrome-extension):"))
@@ -75,9 +59,6 @@ object Application extends JSApp{
     })
     module.config(initTranslate _)
     module.run(initApp _)
-    LoggerPrintStream.init()
-    LogSourceMapper.init()
-
   }
 
   def initApp($http: HttpService, $rootScope: js.Dynamic, $location: js.Dynamic) = {
