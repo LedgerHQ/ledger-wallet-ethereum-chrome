@@ -3,7 +3,6 @@ package co.ledger.wallet.web.ethereum.controllers
 import biz.enef.angulate.{Controller, Scope}
 import biz.enef.angulate.Module.RichModule
 import biz.enef.angulate.core.JQLite
-import co.ledger.wallet.core.device.utils.EventReceiver
 import co.ledger.wallet.web.ethereum.Application
 import co.ledger.wallet.web.ethereum.components.NavigationBar.NavigationBarScope
 import co.ledger.wallet.web.ethereum.components.SnackBar.SnackBarScope
@@ -44,7 +43,7 @@ import scala.scalajs.js.timers._
   * SOFTWARE.
   *
   */
-class WindowController(windowService: WindowService, $scope: Scope, $element: JQLite, $document: JQLite) extends Controller with EventReceiver {
+class WindowController(windowService: WindowService, $scope: Scope, $element: JQLite, $document: JQLite) extends Controller {
   import timers._
   var showNavigationBar = false
 
@@ -78,24 +77,6 @@ class WindowController(windowService: WindowService, $scope: Scope, $element: JQ
       $scope.$parent.$apply()
     }
   }
-
-  override def receive: Receive = {
-    case windowService.StartRefresh() =>
-      _navigationBarScope.isRefreshing = true
-      setTimeout(0) {
-        _navigationBarScope.$apply()
-      }
-    case windowService.StopRefresh() =>
-      _navigationBarScope.isRefreshing = false
-      setTimeout(0) {
-        _navigationBarScope.$apply()
-      }
-  }
-
-  $scope.$on("$destroy", {(_: js.Any) =>
-    windowService.eventEmitter.unregister(this)
-  })
-  windowService.eventEmitter.register(this)
 
   private val _snackBarScope = $element.find("> snackbar").scope().asInstanceOf[SnackBarScope]
   private val _navigationBarScope = $element.find("> navigation-bar").scope().asInstanceOf[NavigationBarScope]
