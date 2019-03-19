@@ -1,4 +1,12 @@
 # Changelog
+2.0.1 (2019-03-19)
+==================
+- Rewording
+
+2.0.0 (2018-12-07)
+==================
+- Deprecate the application
+
 1.3.2 (2018-08-09)
 ==================
 - Add migration screen

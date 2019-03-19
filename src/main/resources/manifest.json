@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "__MSG_application_name__",
   "description": "__MSG_application_small_description__",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "default_locale": "en",
   "minimum_chrome_version": "50",
   "app": {
